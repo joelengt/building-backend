@@ -1,12 +1,12 @@
 import messages from '/messages'
-import {menuService} from '/services'
+import {clientsService} from '/services'
 
-const debug = require('debug')('assistance-service:controllers:menu')
+const debug = require('debug')('assistance-service:controllers:clients')
 
-class MenuController {
+class ClientsController {
   async getList (req, res) {
     try {
-      let userService = await menuService.getList()
+      let userService = await clientsService.getList()
       if (userService.status !== 200) {
         return res[`${userService.status}`]({success: false}, userService.message)
       }
@@ -20,7 +20,7 @@ class MenuController {
 
   async create (req, res) {
     try {
-      let userService = await menuService.create(req.body)
+      let userService = await clientsService.create(req.body)
       if (userService.status !== 201) {
         return res[`${userService.status}`]({success: false}, userService.message)
       }
@@ -35,7 +35,7 @@ class MenuController {
   async getById (req, res) {
     try {
       let id = req.params.id
-      let userService = await menuService.getById(id)
+      let userService = await clientsService.getById(id)
       if (userService.status !== 200) {
         return res[`${userService.status}`]({success: false}, userService.message)
       }
@@ -52,7 +52,7 @@ class MenuController {
       let userItemID = req.params.id
       let userData = req.body
 
-      let userService = await menuService.updateById(userData, userItemID)
+      let userService = await clientsService.updateById(userData, userItemID)
       if (userService.status !== 200) {
         return res[`${userService.status}`]({success: false}, userService.message)
       }
@@ -67,7 +67,7 @@ class MenuController {
   async deleteById (req, res) {
     try {
       let id = req.params.id
-      let userService = await menuService.deleteById(id)
+      let userService = await clientsService.deleteById(id)
       if (userService.status !== 200) {
         return res[`${userService.status}`]({success: false}, userService.message)
       }
@@ -80,4 +80,4 @@ class MenuController {
   }
 }
 
-export default MenuController
+export default ClientsController

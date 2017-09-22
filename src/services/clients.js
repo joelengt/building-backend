@@ -1,11 +1,11 @@
-import {menuRepository} from '/repository'
+import {clientsRepository} from '/repository'
 
-const debug = require('debug')('assistance-service:services:menu')
+const debug = require('debug')('assistance-service:services:clients')
 
-class MenuService {
+class ClientsService {
   async getList () {
     try {
-      let userService = await menuRepository.getList()
+      let userService = await clientsRepository.getList()
       let payload = userService
       return payload
     } catch (err) {
@@ -16,7 +16,7 @@ class MenuService {
 
   async create (data) {
     try {
-      let userService = await menuRepository.create(data)
+      let userService = await clientsRepository.create(data)
       let payload = userService
       return payload
     } catch (err) {
@@ -27,7 +27,7 @@ class MenuService {
 
   async getById (id) {
     try {
-      let userService = await menuRepository.getById(id)
+      let userService = await clientsRepository.getById(id)
       let payload = userService
       return payload
     } catch (err) {
@@ -38,7 +38,7 @@ class MenuService {
 
   async updateById (data, id) {
     try {
-      let userService = await menuRepository.updateById(data, id)
+      let userService = await clientsRepository.updateById(data, id)
       let payload = userService
       return payload
     } catch (err) {
@@ -49,7 +49,7 @@ class MenuService {
 
   async deleteById (id) {
     try {
-      let userService = await menuRepository.deleteById(id)
+      let userService = await clientsRepository.deleteById(id)
       let payload = userService
       return payload
     } catch (err) {
@@ -59,4 +59,4 @@ class MenuService {
   }
 }
 
-export default MenuService
+export default ClientsService
