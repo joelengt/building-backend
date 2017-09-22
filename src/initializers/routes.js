@@ -2,6 +2,7 @@ import users from '/routes/users'
 import menu from '/routes/menu'
 import orders from '/routes/orders'
 import clients from '/routes/clients'
+import auth from '/routes/auth'
 
 const debug = require('debug')('assistance-service:routes')
 
@@ -11,6 +12,7 @@ module.exports = (app) => {
   app.use('/api/menu', menu)
   app.use('/api/orders', orders)
   app.use('/api/clients', clients)
+  app.use('/api/auth', auth)
 
   // Middleware express 401
   app.use((err, req, res, next) => {

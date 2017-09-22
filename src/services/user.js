@@ -37,6 +37,17 @@ class UserService {
     }
   }
 
+  async getByEmail (email) {
+    try {
+      let userService = await userRepository.getByEmail(email)
+      let payload = userService
+      return payload
+    } catch (err) {
+      let payload = err
+      return payload
+    }
+  }
+
   async updateById (userData, userItemID) {
     try {
       let userService = await userRepository.updateById(userData, userItemID)

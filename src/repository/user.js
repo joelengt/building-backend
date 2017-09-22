@@ -236,6 +236,45 @@ class UserRepository {
     }
   }
 
+  async getByEmail (email) {
+    try {
+      let userEmail = email
+
+      let userItem = await sql('users')
+      .innerJoin('user_type', (qb) => {
+        qb.on('user_type.id', 'users.user_type_id')
+      })
+      .where({'users.email': userEmail})
+      .limit(1)
+      .spread(noop)
+
+      // Validate element found
+      if (userItem === undefined) {
+        let payload = {
+          status: 404,
+          message: messages.usersItemsNotFound
+        }
+        return payload
+      }
+
+      let payload = {
+        status: 200,
+        data: {
+          item: userItem
+        },
+        message: messages.usersItemsFound
+      }
+
+      return payload
+    } catch (err) {
+      let payload = {
+        status: 500,
+        message: err
+      }
+      return payload
+    }
+  }
+
   async updateById (userData, id) {
     try {
       // Get body data

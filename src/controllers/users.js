@@ -52,6 +52,21 @@ class UserController {
     }
   }
 
+  async getByEmail (req, res) {
+    try {
+      let email = req.params.email
+      let userService = await usersService.getById(email)
+      if (userService.status !== 200) {
+        return res[`${userService.status}`]({success: false}, userService.message)
+      }
+
+      let payload = userService.data
+      return res.ok(payload, messages.usersItemsFound)
+    } catch (err) {
+      return res['500']({success: false}, err)
+    }
+  }
+
   async updateById (req, res) {
     try {
       let userItemID = req.params.id
