@@ -1,6 +1,6 @@
-import MicrosoftCognitiveRepository from './microsoft-cognitive'
-const microsoftCognitiveRepository = new MicrosoftCognitiveRepository()
+import UserRepository from './user'
+const userRepository = new UserRepository()
 
-export default {
-  microsoftCognitiveRepository
+export {
+  userRepository
 }

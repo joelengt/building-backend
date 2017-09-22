@@ -1,16 +1,7 @@
-import MicrosoftCognitive from './api-microsoft-cognitive'
-import FaceIndetifyAppication from './face-indetify-appication'
-import User from './users'
-import AssistanceOverview from './assistance-application'
+import UserController from './users'
 
-const microsoftCognitive = new MicrosoftCognitive()
-const faceIndetifyAppication = new FaceIndetifyAppication()
-const user = new User()
-const assistanceOverview = new AssistanceOverview()
+const userController = new UserController()
 
-export default {
-  microsoftCognitive,
-  faceIndetifyAppication,
-  user,
-  assistanceOverview
+export {
+  userController
 }

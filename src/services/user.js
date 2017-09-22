@@ -1,12 +1,12 @@
 import messages from '/messages'
-import {usersService} from '/services'
+import {userRepository} from '/repository'
 
-const debug = require('debug')('assistance-service:controllers:users')
+const debug = require('debug')('assistance-service:services:users')
 
-class UserController {
+class UserService {
   async getList (req, res) {
     try {
-      let userService = await usersService.getList()
+      let userService = await userRepository.getList()
       if (userService.status !== 200) {
         return res[`${userService.status}`]({success: false}, userService.message)
       }
@@ -20,7 +20,7 @@ class UserController {
 
   async create (req, res) {
     try {
-      let userService = await usersService.create(req.body)
+      let userService = await userRepository.create(req.body)
       if (userService.status !== 201) {
         return res[`${userService.status}`]({success: false}, userService.message)
       }
@@ -35,7 +35,7 @@ class UserController {
   async getById (req, res) {
     try {
       let id = req.params.id
-      let userService = await usersService.getById(id)
+      let userService = await userRepository.getById(id)
       if (userService.status !== 200) {
         return res[`${userService.status}`]({success: false}, userService.message)
       }
@@ -52,7 +52,7 @@ class UserController {
       let userItemID = req.params.id
       let userData = req.body
 
-      let userService = await usersService.updateById(userData, userItemID)
+      let userService = await userRepository.updateById(userData, userItemID)
       if (userService.status !== 200) {
         return res[`${userService.status}`]({success: false}, userService.message)
       }
@@ -67,7 +67,7 @@ class UserController {
   async deleteById (req, res) {
     try {
       let id = req.params.id
-      let userService = await usersService.deleteById(id)
+      let userService = await userRepository.deleteById(id)
       if (userService.status !== 200) {
         return res[`${userService.status}`]({success: false}, userService.message)
       }
@@ -80,4 +80,4 @@ class UserController {
   }
 }
 
-export default UserController
+export default UserService

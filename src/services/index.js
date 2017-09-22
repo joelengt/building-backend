@@ -1,6 +1,6 @@
-import MicrosoftCognitiveService from './microsoft-cognitive'
-const microsoftCognitiveService = new MicrosoftCognitiveService()
+import UserService from './user'
+const usersService = new UserService()
 
-export default {
-  microsoftCognitiveService
+export {
+  usersService
 }

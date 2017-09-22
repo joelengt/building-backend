@@ -1,24 +1,10 @@
-import apiCognitiveMicrosoft from '/routes/cognitive-microsoft'
-import apiAssistance from '/routes/assistance'
-import applicationFace from '/routes/face-app'
-import home from '/routes/pages/home'
 import users from '/routes/users'
-import usersView from '/routes/pages/user'
-import checkAssistance from '/routes/pages/assistance'
 
 const debug = require('debug')('assistance-service:routes')
 
 module.exports = (app) => {
   // api
-  app.use('/api/cognitive-microsoft', apiCognitiveMicrosoft)
-  app.use('/api/verify-face', applicationFace)
   app.use('/api/users', users)
-  app.use('/api/assistance', apiAssistance)
-
-  // viewers
-  app.use('/test', home)
-  app.use('/users', usersView)
-  app.use('/assistance', checkAssistance)
 
   // Middleware express 401
   app.use((err, req, res, next) => {
