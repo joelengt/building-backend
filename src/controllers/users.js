@@ -5,7 +5,10 @@ const debug = require('debug')('assistance-service:controllers:users')
 
 class UserController {
   async getList (req, res) {
+    debug('userService controller 1')
     try {
+      debug('userService controller 2')
+
       let userService = await usersService.getList()
       if (userService.status !== 200) {
         return res[`${userService.status}`]({success: false}, userService.message)
@@ -14,6 +17,8 @@ class UserController {
       let payload = userService.data
       return res.ok(payload, messages.usersItemsFound)
     } catch (err) {
+      debug('Result!!! error', err)
+
       return res['500']({success: false}, err)
     }
   }
@@ -73,7 +78,7 @@ class UserController {
       }
 
       let payload = userService.data
-      return res.ok(payload, messages.usersItemsFound)
+      return res.ok(payload, messages.userItemDeleted)
     } catch (err) {
       return res['500']({success: false}, err)
     }

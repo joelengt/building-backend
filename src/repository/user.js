@@ -8,7 +8,8 @@ import messages from '/messages'
 
 import {
   noop,
-  encryptPassword
+  encryptPassword,
+  verifyEmail
 } from '/utils'
 
 var sql = require('/initializers/knex')
@@ -16,63 +17,40 @@ var tokenSecret = process.env.JWT_SECRET
 
 const debug = require('debug')('assistance-service:repository:users')
 
-const verifyEmail = async (email) => {
-  let user = await sql('user')
-  .where({email})
-  .limit(1)
-  .spread(noop)
-
-  let status
-  let msg
-  if (user !== undefined) {
-    status = 400
-    msg = `Ya existe un usuario con el correo ${email}`
-  } else {
-    status = 200
-    msg = `El email ${email} esta disponible`
-  }
-
-  let payload = {
-    status: status,
-    message: msg
-  }
-  return payload
-}
-
 class UserRepository {
   async getList () {
     try {
-      // Get users from database
+      // Find element updated
       let attributes = [
-        'user.uuid AS id',
-        'user.name AS name',
-        'user.last_name AS last_name',
-        'user.photo AS photo',
-        'user.email AS email',
-        'user.phone AS phone',
-        'user.business_name AS business_name',
-        'user.fiscal_name AS fiscal_name',
-        'user.fiscal_address AS fiscal_address',
-        'user.ruc AS ruc',
-        'user.dni AS dni',
-        'user.points AS points',
-        'user.provider AS provider',
-        'user.onboard_finished AS onboard_finished',
-        'user.access_token AS access_token',
-        'user.refresh_token AS refresh_token',
-        'user.is_admin AS is_admin',
-        'user.is_active AS is_active',
-        'user.is_email_verified AS is_email_verified',
-        'user.is_archived AS is_archived',
-        'user.created_at AS created_at',
-        'user.updated_at AS updated_at',
-        'user.archived_at AS archived_at'
+        'users.id AS id',
+        'users.uuid AS uuid',
+        'users.name AS name',
+        'users.last_name AS last_name',
+        'users.photo AS photo',
+        'users.email AS email',
+        'users.phone AS phone',
+        'users.ruc AS ruc',
+        'users.dni AS dni',
+        'users.access_token AS access_token',
+        'users.refresh_token AS refresh_token',
+        'users.is_archived AS is_archived',
+        'users.created_at AS created_at',
+        'users.updated_at AS updated_at',
+        'users.archived_at AS archived_at',
+        'users.user_type_id AS user_type_id',
+        'user_type.title AS user_type_title',
+        'user_type.icon AS user_type_icon'
       ]
 
-      let users = await sql('user')
+      // Get users from database
+      let users = await sql('users')
       .select(attributes)
+      .innerJoin('user_type', (qb) => {
+        qb.on('user_type.id', 'users.user_type_id')
+      })
 
-      if (users.length === 0) {
+      // Validate if users was found
+      if (!users.length) {
         let payload = {
           status: 404,
           message: messages.usersItemsNotFound
@@ -87,6 +65,7 @@ class UserRepository {
         },
         message: messages.usersItemsFound
       }
+
       return payload
     } catch (err) {
       let payload = {
@@ -99,24 +78,9 @@ class UserRepository {
 
   async create (userData) {
     try {
-      // Validate body data
-      if (userData.name === undefined ||
-        userData.last_name === undefined ||
-        userData.email === undefined ||
-        userData.password === undefined ||
-        userData.name === '' ||
-        userData.last_name === '' ||
-        userData.email === '' ||
-        userData.password === '') {
-        let payload = {
-          status: 400,
-          message: messages.userCreateBadRequest
-        }
-        return payload
-      }
-
       // Get body data
       let user = {
+        user_type_id: userData.user_type_id,
         uuid: uuid.v1(),
         name: userData.name,
         last_name: userData.last_name,
@@ -124,9 +88,6 @@ class UserRepository {
         password: userData.password,
         photo: userData.photo || 'https://res.cloudinary.com/riqra/image/upload/profile.png'
       }
-
-      user.provider = userData.provider || 'local'
-      user.provider_id = userData.provider_id || null
 
       // email verification
       let emailAvailable = await verifyEmail(user.email)
@@ -149,19 +110,9 @@ class UserRepository {
       user.refresh_token = refreshToken
 
       // Create new user
-      let userCreate = await sql('user')
+      let userCreate = await sql('users')
       .insert(user)
       .returning('*')
-      .catch((err) => {
-        let payload = {
-          status: 400,
-          data: {
-            error: err.detail
-          },
-          message: 'Error en los campos'
-        }
-        return payload
-      })
       .spread(noop)
 
       if (userCreate.status) {
@@ -172,38 +123,30 @@ class UserRepository {
 
       // Find element ads created
       let attributes = [
-        'user.uuid AS id',
-        'user.name AS name',
-        'user.last_name AS last_name',
-        'user.photo AS photo',
-        'user.email AS email',
-        'user.phone AS phone',
-        'user.business_name AS business_name',
-        'user.fiscal_name AS fiscal_name',
-        'user.fiscal_address AS fiscal_address',
-        'user.ruc AS ruc',
-        'user.dni AS dni',
-        'user.points AS points',
-        'user.provider AS provider',
-        'user.access_token AS access_token',
-        'user.token_email_verification AS token_email_verification',
-        'user.refresh_token AS refresh_token',
-        'user.onboard_finished AS onboard_finished',
-        'user.is_admin AS is_admin',
-        'user.is_active AS is_active',
-        'user.is_email_verified AS is_email_verified',
-        'user.is_archived AS is_archived',
-        'user.created_at AS created_at',
-        'user.updated_at AS updated_at',
-        'user.archived_at AS archived_at'
+        'users.id AS id',
+        'users.uuid AS uuid',
+        'users.name AS name',
+        'users.last_name AS last_name',
+        'users.photo AS photo',
+        'users.email AS email',
+        'users.phone AS phone',
+        'users.user_type_id AS user_type_id',
+        'users.ruc AS ruc',
+        'users.dni AS dni',
+        'users.access_token AS access_token',
+        'users.refresh_token AS refresh_token',
+        'users.is_archived AS is_archived',
+        'users.created_at AS created_at',
+        'users.updated_at AS updated_at',
+        'users.archived_at AS archived_at'
       ]
 
-      let userItem = await sql('user')
+      let userItem = await sql('users')
       .select(attributes)
       .where('id', userId)
       .spread(noop)
 
-      if (userItem === undefined) {
+      if (!userItem) {
         let payload = {
           status: 400,
           message: messages.usersItemsNotFound
@@ -237,34 +180,33 @@ class UserRepository {
       let userId = id
 
       let attributes = [
-        'user.uuid AS id',
-        'user.name AS name',
-        'user.last_name AS last_name',
-        'user.photo AS photo',
-        'user.email AS email',
-        'user.phone AS phone',
-        'user.business_name AS business_name',
-        'user.fiscal_name AS fiscal_name',
-        'user.fiscal_address AS fiscal_address',
-        'user.ruc AS ruc',
-        'user.dni AS dni',
-        'user.points AS points',
-        'user.provider AS provider',
-        'user.onboard_finished AS onboard_finished',
-        'user.access_token AS access_token',
-        'user.refresh_token AS refresh_token',
-        'user.is_admin AS is_admin',
-        'user.is_active AS is_active',
-        'user.is_email_verified AS is_email_verified',
-        'user.is_archived AS is_archived',
-        'user.created_at AS created_at',
-        'user.updated_at AS updated_at',
-        'user.archived_at AS archived_at'
+        'users.id AS id',
+        'users.uuid AS uuid',
+        'users.name AS name',
+        'users.last_name AS last_name',
+        'users.photo AS photo',
+        'users.email AS email',
+        'users.phone AS phone',
+        'users.ruc AS ruc',
+        'users.dni AS dni',
+        'users.access_token AS access_token',
+        'users.refresh_token AS refresh_token',
+        'users.is_archived AS is_archived',
+        'users.created_at AS created_at',
+        'users.updated_at AS updated_at',
+        'users.archived_at AS archived_at',
+        'users.user_type_id AS user_type_id',
+        'user_type.title AS user_type_title',
+        'user_type.icon AS user_type_icon'
       ]
 
-      let userItem = await sql('user')
+      let userItem = await sql('users')
       .select(attributes)
-      .where('uuid', userId)
+      .innerJoin('user_type', (qb) => {
+        qb.on('user_type.id', 'users.user_type_id')
+      })
+      .where({'users.id': userId})
+      .limit(1)
       .spread(noop)
 
       // Validate element found
@@ -296,41 +238,9 @@ class UserRepository {
 
   async updateById (userData, id) {
     try {
-      // Validate body data
-      if (userData.business_type_id === undefined ||
-        userData.name === undefined ||
-        userData.last_name === undefined ||
-        userData.email === undefined ||
-        userData.phone === undefined ||
-        userData.business_name === undefined ||
-        userData.fiscal_name === undefined ||
-        userData.fiscal_address === undefined ||
-        userData.ruc === undefined ||
-        userData.dni === undefined ||
-        userData.photo === undefined ||
-        userData.password === undefined ||
-        userData.business_type_id === '' ||
-        userData.name === '' ||
-        userData.last_name === '' ||
-        userData.email === '' ||
-        userData.phone === '' ||
-        userData.business_name === '' ||
-        userData.fiscal_name === '' ||
-        userData.fiscal_address === '' ||
-        userData.ruc === '' ||
-        userData.dni === '' ||
-        userData.photo === '' ||
-        userData.password === '') {
-        let payload = {
-          status: 400,
-          message: messages.userCreateBadRequest
-        }
-        return payload
-      }
-
       // Get body data
-      let currentUser = await sql('user')
-      .where('uuid', id)
+      let currentUser = await sql('users')
+      .where('id', id)
       .spread(noop)
 
       if (!currentUser) {
@@ -351,21 +261,18 @@ class UserRepository {
       let userItemID = currentUser.id
 
       let user = {
+        user_type_id: userData.user_type_id || currentUser.user_type_id,
         name: userData.name || currentUser.name,
         last_name: userData.last_name || currentUser.last_name,
         email: userData.email || currentUser.email,
         phone: userData.phone || currentUser.phone,
-        business_name: userData.business_name || currentUser.business_name,
-        fiscal_name: userData.fiscal_name || currentUser.fiscal_name,
-        fiscal_address: userData.fiscal_address || currentUser.fiscal_address,
         ruc: userData.ruc || currentUser.ruc,
         dni: userData.dni || currentUser.dni,
-        photo: userData.photo || currentUser.photo,
-        points: userData.points || currentUser.points
+        photo: userData.photo || currentUser.photo
       }
 
       // update attributes
-      let userItemToUpdated = await sql('user')
+      let userItemToUpdated = await sql('users')
       .update(user)
       .where({id: userItemID})
 
@@ -380,32 +287,25 @@ class UserRepository {
 
       // Find element updated
       let attributes = [
-        'user.uuid AS id',
-        'user.name AS name',
-        'user.last_name AS last_name',
-        'user.photo AS photo',
-        'user.email AS email',
-        'user.phone AS phone',
-        'user.business_name AS business_name',
-        'user.fiscal_name AS fiscal_name',
-        'user.fiscal_address AS fiscal_address',
-        'user.ruc AS ruc',
-        'user.dni AS dni',
-        'user.points AS points',
-        'user.provider AS provider',
-        'user.onboard_finished AS onboard_finished',
-        'user.access_token AS access_token',
-        'user.refresh_token AS refresh_token',
-        'user.is_admin AS is_admin',
-        'user.is_active AS is_active',
-        'user.is_email_verified AS is_email_verified',
-        'user.is_archived AS is_archived',
-        'user.created_at AS created_at',
-        'user.updated_at AS updated_at',
-        'user.archived_at AS archived_at'
+        'users.id AS id',
+        'users.uuid AS uuid',
+        'users.name AS name',
+        'users.last_name AS last_name',
+        'users.photo AS photo',
+        'users.email AS email',
+        'users.phone AS phone',
+        'users.user_type_id AS user_type_id',
+        'users.ruc AS ruc',
+        'users.dni AS dni',
+        'users.access_token AS access_token',
+        'users.refresh_token AS refresh_token',
+        'users.is_archived AS is_archived',
+        'users.created_at AS created_at',
+        'users.updated_at AS updated_at',
+        'users.archived_at AS archived_at'
       ]
 
-      let userItemElement = await sql('user')
+      let userItemElement = await sql('users')
       .select(attributes)
       .where('id', userItemID)
       .spread(noop)
@@ -430,8 +330,8 @@ class UserRepository {
   async deleteById (id) {
     try {
       var userId = id
-      let result = await sql('user')
-      .where('uuid', userId)
+      let result = await sql('users')
+      .where('id', userId)
       .del()
       .then((itemDeleted) => {
         if (!itemDeleted) {
