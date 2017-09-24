@@ -17,6 +17,14 @@ var tokenSecret = process.env.JWT_SECRET
 
 const debug = require('debug')('assistance-service:repository:users')
 
+function isValidEmail (email) {
+  let isValid = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,4})+$/.test(email)
+  if (!isValid) return false
+  let emailCompanyFormat = email.split('@')[1].split('.')[0]
+  if (emailCompanyFormat !== 'tekton') return false
+  return true
+}
+
 class UserRepository {
   async getList () {
     try {
@@ -77,6 +85,15 @@ class UserRepository {
   }
 
   async create (userData) {
+    // Validate email with format
+    if (!isValidEmail(userData.email)) {
+      let payload = {
+        status: 400,
+        message: 'Email not valid format'
+      }
+      return payload
+    }
+
     try {
       // Get body data
       let user = {
