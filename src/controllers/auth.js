@@ -7,33 +7,35 @@ import jwt from 'jsonwebtoken'
 import {
   noop,
   authtenticatePassword,
-  encryptPassword
-} from '../utils'
+  encryptPassword,
+  isValidEmail
+} from '/utils'
 
 var debug = require('debug')('assistance-service:controllers:auth')
 
 class AuthController {
   async login (req, res) {
-    debug('auth')
-    // Validate body data
-    if (!req.body.email || !req.body.password) {
-      let payload = {success: false}
-      return res['400'](payload, messages.userCreateBadRequest)
-    }
-
     // Get body data
     let user = {
       email: req.body.email,
       password: req.body.password
     }
 
-    debug('Datos auth', user)
+    // Validate email format
+    if (!isValidEmail(user.email)) {
+      let payload = {success: false}
+      return res['400'](payload, 'El formato de email no es valido')
+    }
+
+    // Validate body data
+    if (!user.email || !user.password) {
+      let payload = {success: false}
+      return res['400'](payload, messages.userCreateBadRequest)
+    }
 
     try {
       // validate user in data base
       let userFound = await usersService.getByEmail(user.email)
-
-      debug('user email found?', userFound)
 
       // find by email
       if (userFound.status !== 200) {

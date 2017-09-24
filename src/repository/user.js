@@ -9,21 +9,14 @@ import messages from '/messages'
 import {
   noop,
   encryptPassword,
-  verifyEmail
+  verifyEmail,
+  isValidEmail
 } from '/utils'
 
 var sql = require('/initializers/knex')
 var tokenSecret = process.env.JWT_SECRET
 
 const debug = require('debug')('assistance-service:repository:users')
-
-function isValidEmail (email) {
-  let isValid = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,4})+$/.test(email)
-  if (!isValid) return false
-  let emailCompanyFormat = email.split('@')[1].split('.')[0]
-  if (emailCompanyFormat !== 'tekton') return false
-  return true
-}
 
 class UserRepository {
   async getList () {
