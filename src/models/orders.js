@@ -4,12 +4,16 @@ require('mongoose-currency').loadType(mongoose)
 let Currency = mongoose.Types.Currency
 
 let paymentOptions = ['CreditCard', 'DebitCard', 'Cash']
+let stateOptions = ['Pendiente', 'EnProceso', 'Terminado']
 
 const orderSchema = new Schema({
   emisor: { type: Number, required: true },
   foods: [{
-    type: Schema.Types.ObjectId,
-    ref: 'food'
+    item: {
+      type: Schema.Types.ObjectId,
+      ref: 'food'
+    },
+    cant: { type: Number, default: 1 }
   }],
   client: {
     type: Schema.Types.ObjectId,
@@ -21,6 +25,8 @@ const orderSchema = new Schema({
     subtotal: { type: Currency, default: 0 },
     total: { type: Currency, default: 0 }
   },
+  state: { type: String, emun: { values: stateOptions, messages: 'Option Not valid' }, default: stateOptions[0] },
+  isEnabled: { type: Boolean, default: false },
   fechaCreada: { type: Date, default: Date.now }
 })
 

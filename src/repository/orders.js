@@ -8,7 +8,8 @@ class OrdersRepository {
     try {
       // Find orders on db
       let orders = await Orders.find()
-      .populate('foods')
+      .populate('foods.item')
+      .populate('client')
 
       // Evalute if orders was found
       if (!orders.length) {
@@ -70,7 +71,8 @@ class OrdersRepository {
     try {
       // Find order on db
       let order = await Orders.findById(orderID)
-      .populate('foods')
+      .populate('foods.item')
+      .populate('client')
 
       // Validate if order was found
       if (!order) {
