@@ -54,7 +54,8 @@ class AuthController {
 
       let payload = {
         access_token: userFound.data.item.access_token,
-        refresh_token: userFound.data.item.refresh_token
+        refresh_token: userFound.data.item.refresh_token,
+        userAccess: userFound.data.item.user_type_id
       }
 
       return res.ok(payload, 'Usuario Autentificado')
