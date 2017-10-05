@@ -21,6 +21,7 @@ const orderSchema = new Schema({
   },
   paymentMethod: { type: String, emun: { values: paymentOptions, messages: 'Option Not valid' } },
   summary: {
+    items: { type: Number, default: 0 },
     igv: { type: Currency, default: 0 },
     subtotal: { type: Currency, default: 0 },
     total: { type: Currency, default: 0 }
