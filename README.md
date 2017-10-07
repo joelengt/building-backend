@@ -1,4 +1,4 @@
-# QR Assistance Service Register
+# Mr Restaurant Backend
 
 A highly scalable and simple boilerplate for server apps.
 
